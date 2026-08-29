@@ -50,14 +50,7 @@ The fork is **public**: `https://github.com/pierceppdh/web-money-manager-ex.git`
 3. Stack name: `webmmxapp`
 4. Branch: `master`
 5. Compose path: **`compose.yaml`**
-6. Stack variables:
-
-   | Key | Value |
-   |---|---|
-   | `WEBMMX_PORT` | `9081` |
-   | `WEBMMX_DATA` | `/data/webmmxapp` |
-   | `WEBMMX_DNS` | `192.168.0.25` |
-
+6. Port **9081**, data **`/data/webmmxapp`**, and DNS are hardcoded in `compose.yaml` (no stack variables required)
 7. Enable **Build on deploy** (required: the image is built from this repo)
 8. Enable **Force redeploy** / **Re-pull** if your Dockhand version has it, so a PHP-only commit still rebuilds
 9. Deploy and confirm `http://omv.home:9081/`
@@ -66,7 +59,15 @@ Desktop MMEX still points at the old URL until you change **Options → Network 
 
 ## 5. Updates: webhook vs poll
 
-GitHub cannot call `http://omv.home:9011/` from the internet. Pick one:
+GitHub cannot call `http://omv.home:9011/` from the internet. After `git push`, trigger Dockhand from the LAN:
+
+```bash
+scripts/dockhand-webhook.sh
+```
+
+(credentials in `.env.local`, not in Git). That is the path used from this workspace.
+
+Alternatively:
 
 ### A. Poll (fits a home VPN; recommended)
 
