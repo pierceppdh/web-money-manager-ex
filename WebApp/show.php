@@ -1,173 +1,155 @@
 <?php
 
 $b_restricted_auth  = true;
+$b_compact_header   = true;
 
 $a_head_js_add[]      = '<script src="res/app/base-1.0.4.js" type="text/javascript"></script>';
-$a_head_js_add[]      = '<script src="res/app/show-1.1.0.js" type="text/javascript"></script>';
+$a_head_js_add[]      = '<script src="res/app/show-1.2.0.js" type="text/javascript"></script>';
 
 include_once '_common.php';
 
-$s_page_title = $lang["page.show-transactions"];    
+$s_page_title = $lang["page.show-transactions"];
 include_once '_header.php';
 
-function drawRecordRow(Array $a_transaction, String $s_date) : void
+function show_h($value)
 {
-    if ($s_date != $a_transaction['Date'])
-    {
-        $TrDateShow = $a_transaction['Date'];
-        echo '<tr>';
-        design::table_cell($TrDateShow,'td_size_100 text_align_center', 'colspan="7"');
-        echo '</tr>';
-    }
-
-    //TRANSACTION ID
-    $lineid = $a_transaction['ID'];
-
-    echo '<tr>';
-
-        //DELETE
-        echo '<td class="text_align_center">';
-            echo '<input class="do-delete" type="checkbox" name="TrDelete[]" value="' . $lineid . '" />';
-            echo '&nbsp;<span class="glyphicon glyphicon-edit do-edit TrModify" tr_id="' . $lineid . '"></span>';
-            echo '&nbsp;<span class="glyphicon glyphicon-duplicate do-duplicate TrDuplicate" tr_id="' . $lineid . '"></span>';
-        echo '</td>';
-
-        //CONDITION
-        switch ($a_transaction['Status'])
-        {
-            case '': $TrStatusShow = ''; break;
-            case 'R': $TrStatusShow = 'ok-sign'; break;
-            case 'V': $TrStatusShow = 'remove-sign'; break;
-            case 'F': $TrStatusShow = 'question-sign'; break;
-            case 'D': $TrStatusShow = 'duplicate'; break;
-            default: $TrStatusShow = $a_transaction['Status'];
-        }
-
-        //TYPE
-        switch ($TrTypeShow = $a_transaction['Type'])
-        {
-            case 'Withdrawal': $TrTypeShowFormatted = 'minus'; break;
-            case 'Deposit': $TrTypeShowFormatted = 'plus'; break;
-            case 'Transfer': $TrTypeShowFormatted = 'transfer'; break;
-            default: $TrStatusShow = $a_transaction['Type'];
-        }
-
-        design::table_cell(
-            '<span class="glyphicon glyphicon-' . $TrTypeShowFormatted . '"></span>&nbsp;'.
-            '<span class="glyphicon glyphicon-' . $TrStatusShow . '"></span>'
-            , '');
-
-        //AMOUNT
-        $TrAmountShow = number_format($a_transaction['Amount'],2,',','');
-        design::table_cell($TrAmountShow,'text_align_right td_size_5');
-
-        //NOTES
-        $TrNotesShow = $a_transaction['Notes'];
-        $NotesHTMLCode = '';
-        if ($TrNotesShow != '' && $TrNotesShow != 'None')
-            $NotesHTMLCode .= '<span class="glyphicon glyphicon-comment" data-toggle="tooltip" title="' . $TrNotesShow . '" id="tooltip_notes_' . $lineid . '"></span> ';
-        if (attachments::get_number_of_attachments($lineid) > 0)
-            $NotesHTMLCode .= '<span class="glyphicon glyphicon-paperclip"></span>';
-        design::table_cell($NotesHTMLCode,'text_align_center');
-
-        //ACCOUNT
-        $TrAccountShow = $a_transaction['Account'];
-        $TrToAccountShow = $a_transaction['ToAccount'];
-        if ($TrTypeShow == 'Transfer')
-        {
-            design::table_cell('<span data-toggle="tooltip" title="Transfer to: ' . $TrToAccountShow . '" id="tooltip_account_' . $lineid .'">' . $TrAccountShow . '</span>','');
-        }
-        else
-            {design::table_cell($TrAccountShow,'');}
-
-        //PAYEE
-        $TrPayeeShow = $a_transaction['Payee'];
-        if (costant::disable_payee() == False)
-            {design::table_cell($TrPayeeShow,'transaction-extra-columns');}
-
-        //CATEGORY
-        $TrCategoryShow = $a_transaction['Category'];
-        $TrSubCategoryShow = $a_transaction['SubCategory'];
-        if (costant::disable_category() == False && $TrSubCategoryShow != 'None' && !empty($TrSubCategoryShow))
-        {
-            design::table_cell('<span data-toggle="tooltip" title="Subcategory: ' . $TrSubCategoryShow . '" id="tooltip_category_' . $lineid . '">' . $TrCategoryShow . '&nbsp;<span class="glyphicon glyphicon-equalizer"></span></span></span>','');
-        }
-        else if (costant::disable_category() == False)
-                {design::table_cell($TrCategoryShow,'');}
-
-    echo '</tr>';
+    return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
 }
 
-$recordmaxid = db_function::transaction_select_maxid();
-if ($recordmaxid > 0 ) :
+function show_format_date($date)
+{
+    $ts = strtotime($date);
+    if ($ts === false)
+    {
+        return show_h($date);
+    }
+    return show_h(date('D j M Y', $ts));
+}
 
-    $resultarray = db_function::transaction_select_all_order_by_date('DESC');
-    echo '<div class="container">';
-        echo '<h3 class="text_align_center">' . (count($resultarray) == 0 ? $lang["show.no_pending_trans"] : $lang["show.current_pending_trans"]). '</h3>';
-        echo '<br />';
-        echo '<div class="table-responsive">';
+function show_type_meta($type)
+{
+    switch ($type)
+    {
+        case 'Deposit':
+            return array('label' => costant::lang('trans.type.deposit'), 'icon' => 'plus', 'class' => 'show-amount-deposit');
+        case 'Transfer':
+            return array('label' => costant::lang('trans.type.transfer'), 'icon' => 'transfer', 'class' => 'show-amount-transfer');
+        default:
+            return array('label' => costant::lang('trans.type.withdrawal'), 'icon' => 'minus', 'class' => 'show-amount-withdrawal');
+    }
+}
 
-            echo '<form id="Show_Function" class="form-show-function" method="post" action="show_function.php">';
+$resultarray = db_function::transaction_select_all_order_by_date('DESC');
+$count = is_array($resultarray) ? count($resultarray) : 0;
 
-            echo '<input class="btn-edit" type="hidden" id="btn_action" name="btn_action" value="" />';
-            /**
-             *  edit selected transaction
-             */
-            echo '<input class="do-edit" type="hidden" id="TrEdit" name="TrEdit[]" value="" />';
+echo '<div class="container show-page">';
 
-            /**
-             *  delete button
-             */
-            echo "<button type='submit' id='TrDelete' name='btn_action' value='Delete' class='btn btn-lg btn-danger btn-block'>{$lang["show.delete_all_selected"]}</button>";
+if ($count === 0)
+{
+    echo '<h3 class="text_align_center">' . show_h($lang['show.no_pending_trans']) . '</h3>';
+    echo '<br />';
+    echo '<a href="new_transaction.php" class="btn btn-lg btn-success btn-block">' . show_h($lang['show.add_new']) . '</a>';
+    echo '</div>';
+    include_once '_footer.php';
+    return;
+}
 
-            /**
-             *  new button
-             */
-            echo '<input type="button" class="btn btn-lg btn-success btn-block" id="btn_new" value="'.$lang["show.new"].'" onclick='."'top.location.href = ".'"new_transaction.php"'."' />";
-            echo '<br />';
+echo '<a href="new_transaction.php" class="btn btn-lg btn-success btn-block" id="btn_new">' . show_h($lang['show.new']) . '</a>';
 
-            echo '<table class="table table-hover table-condensed">';
-            #echo '<table class = "table table-hover table-condensed table-bordered">'; //TABLE BORDERED FOR DEBUG
-                echo '<thead>';
-                    echo '<tr>';
-                        echo "<th class='text_align_center'><span class='glyphicon glyphicon-trash'></span> <span class='transaction-extra-columns'>{$lang["show.delete"]}</span></th>";
-                        echo "<th class=''><span class='glyphicon glyphicon-info-sign'></span> <span class='transaction-extra-columns'>{$lang["trans.type"]}</span></th>";
-                        echo "<th class='text_align_right'>{$lang["trans.amount"]}</th>";
-                        echo "<th class='text_align_center'>{$lang["trans.notes"]}</th>";
-                        echo "<th>{$lang["account"]}</th>";
-                        if (costant::disable_payee() == False)
-                            {echo "<th class='transaction-extra-columns'>{$lang["trans.payee"]}</th>";}
-                        if (costant::disable_category() == False)
-                            {echo "<th>{$lang["trans.category"]}</th>";}
-                    echo '</tr>';
-                echo '</thead>';
-                
-                echo '<tbody>';
-                $s_date = '';
-                for ($i = 0; $i <= $recordmaxid; $i++)
-                {
-                    if (isset($resultarray[$i]['ID']))
-                    {
-                        drawRecordRow($resultarray[$i], $s_date);
-                        $s_date = $resultarray[$i]['Date'];
-                    }
-                }
-                echo '</tbody>';
-            echo '</table>';
-            echo '</form>';
+$pending_label = ($count === 1) ? $lang['show.pending_one'] : sprintf($lang['show.pending_many'], $count);
+echo '<p class="show-count">' . show_h($pending_label) . '</p>';
+
+echo '<form id="Show_Function" class="form-show-function" method="post" action="show_function.php">';
+echo '<input type="hidden" id="btn_action" name="btn_action" value="" />';
+echo '<input type="hidden" id="TrEdit" name="TrEdit[]" value="" />';
+echo '<button type="submit" id="TrDelete" name="btn_action" value="Delete" class="btn btn-lg btn-danger btn-block">' . show_h($lang['show.delete_all_selected']) . '</button>';
+
+$current_date = null;
+foreach ($resultarray as $row)
+{
+    if (!isset($row['ID']))
+    {
+        continue;
+    }
+
+    if ($current_date !== $row['Date'])
+    {
+        if ($current_date !== null)
+        {
+            echo '</div>';
+        }
+        $current_date = $row['Date'];
+        echo '<div class="show-day">';
+        echo '<div class="show-day-label">' . show_format_date($row['Date']) . '</div>';
+    }
+
+    $id = $row['ID'];
+    $type = isset($row['Type']) ? $row['Type'] : 'Withdrawal';
+    $meta = show_type_meta($type);
+    $amount = number_format((float)$row['Amount'], 2, ',', ' ');
+    $account = isset($row['Account']) ? $row['Account'] : '';
+    $to_account = isset($row['ToAccount']) ? $row['ToAccount'] : '';
+    $payee = isset($row['Payee']) ? $row['Payee'] : '';
+    $category = isset($row['Category']) ? $row['Category'] : '';
+    $sub = isset($row['SubCategory']) ? $row['SubCategory'] : '';
+    $notes = isset($row['Notes']) ? $row['Notes'] : '';
+
+    if ($type === 'Transfer' && $to_account !== '' && $to_account !== 'None')
+    {
+        $account_line = $account . ' → ' . $to_account;
+    }
+    else
+    {
+        $account_line = $account;
+    }
+
+    $details = array();
+    if ($payee !== '' && $payee !== 'None' && costant::disable_payee() == False)
+    {
+        $details[] = $payee;
+    }
+    if ($category !== '' && $category !== 'None' && costant::disable_category() == False)
+    {
+        $cat_line = $category;
+        if ($sub !== '' && $sub !== 'None')
+        {
+            $cat_line .= ' / ' . $sub;
+        }
+        $details[] = $cat_line;
+    }
+
+    echo '<div class="show-card">';
+        echo '<label class="show-check">';
+            echo '<input class="do-delete" type="checkbox" name="TrDelete[]" value="' . show_h($id) . '" />';
+        echo '</label>';
+        echo '<div class="show-main">';
+            echo '<div class="show-line1">';
+                echo '<span class="show-amount ' . $meta['class'] . '">' . show_h($amount) . '</span>';
+                echo '<span class="show-type"><span class="glyphicon glyphicon-' . $meta['icon'] . '"></span> ' . show_h($meta['label']) . '</span>';
+            echo '</div>';
+            echo '<div class="show-line2">' . show_h($account_line) . '</div>';
+            if (!empty($details))
+            {
+                echo '<div class="show-line3">' . show_h(implode(' · ', $details)) . '</div>';
+            }
+            if ($notes !== '' && $notes !== 'None' && $notes !== 'Empty')
+            {
+                echo '<div class="show-notes">' . show_h($notes) . '</div>';
+            }
+        echo '</div>';
+        echo '<div class="show-actions">';
+            echo '<button type="button" class="show-icon-btn do-edit TrModify" tr_id="' . show_h($id) . '" title="' . show_h($lang['trans.update.header']) . '"><span class="glyphicon glyphicon-edit"></span></button>';
+            echo '<button type="button" class="show-icon-btn do-duplicate TrDuplicate" tr_id="' . show_h($id) . '" title="' . show_h($lang['trans.duplicate.header']) . '"><span class="glyphicon glyphicon-duplicate"></span></button>';
         echo '</div>';
     echo '</div>';
+}
 
-else: ?>
+if ($current_date !== null)
+{
+    echo '</div>';
+}
 
-    <div class="container">
-        <h3 class="text_align_center"><?php echo $lang["show.no_pending_trans"] ?></h3>
-        <br />
-        <br />
-        <a href="new_transaction.php" class="btn btn-lg btn-success btn-block"><?php echo $lang["show.add_new"] ?></a>
-
-<?php
-
-endif;
+echo '</form>';
+echo '</div>';
 
 include_once '_footer.php';

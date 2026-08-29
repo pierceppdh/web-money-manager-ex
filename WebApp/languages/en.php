@@ -87,7 +87,9 @@ $lang["guide.desktop-guid"] = "Desktop GUID";
 
 $lang["show.no_pending_trans"] = "No pending transactions";
 $lang["show.current_pending_trans"] = "Current pending transactions";
-$lang["show.delete_all_selected"] = "Delete all selected";
+$lang["show.pending_one"] = "1 pending transaction";
+$lang["show.pending_many"] = "%d pending transactions";
+$lang["show.delete_all_selected"] = "Delete selected";
 $lang["show.add_new"] = "Add new";
 $lang["show.delete"] = "Delete";
 $lang["show.new"] = "New transaction";

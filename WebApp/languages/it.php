@@ -87,7 +87,9 @@ $lang["guide.desktop-guid"] = "Desktop GUID:";
 
 $lang["show.no_pending_trans"] = "Nessuna operazione in sospeso";
 $lang["show.current_pending_trans"] = "Operazioni in sospeso";
-$lang["show.delete_all_selected"] = "Cancella le righe selezionate";
+$lang["show.pending_one"] = "1 operazione in sospeso";
+$lang["show.pending_many"] = "%d operazioni in sospeso";
+$lang["show.delete_all_selected"] = "Cancella selezionate";
 $lang["show.add_new"] = "Nuova operazione";
 $lang["show.delete"] = "Cancella";
 $lang["show.new"] = "Nuova operazione";
