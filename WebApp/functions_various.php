@@ -7,10 +7,10 @@ class various
 {
     public static function send_alert_and_redirect ($AlertMessage, $AlertRedirect)
         {
-            echo '<script src="res/app/functions-1.2.0.js" type="text/javascript"></script>';
+            echo '<script src="res/app/functions-1.3.0.js" type="text/javascript"></script>';
             echo '<script language="javascript">';
             if ($AlertRedirect <> 'None')
-                {echo "send_alert_and_redirect ('${AlertMessage}','${AlertRedirect}')";}
+                {echo "send_alert_and_redirect ('{$AlertMessage}','{$AlertRedirect}')";}
             echo '</script>';
         }
 
@@ -29,7 +29,7 @@ class various
             fwrite($fileopen, "\n");
 
             foreach ($ParameterArray as $key => $value)
-                {fwrite($fileopen, "\$${key} = \"${value}\";\n");}
+                {fwrite($fileopen, '$' . $key . ' = "' . $value . '";' . "\n");}
 
             fclose($fileopen);
 
@@ -154,5 +154,47 @@ class various
         $page_title .= costant::app_name();
 
         return $page_title;
+    }
+
+    public static function last_account_get()
+    {
+        if (!empty($_COOKIE['mmex_last_account']))
+        {
+            return $_COOKIE['mmex_last_account'];
+        }
+        return costant::transaction_default_account();
+    }
+
+    public static function last_account_set($account)
+    {
+        if ($account === '' || $account === 'None')
+        {
+            return;
+        }
+        setcookie('mmex_last_account', $account, time() + 86400 * 400, '/');
+    }
+
+    public static function last_payees_get()
+    {
+        if (empty($_COOKIE['mmex_last_payees']))
+        {
+            return array();
+        }
+        return array_values(array_filter(explode('|', $_COOKIE['mmex_last_payees'])));
+    }
+
+    public static function last_payees_remember($payee)
+    {
+        if ($payee === '' || $payee === 'None')
+        {
+            return;
+        }
+        $list = self::last_payees_get();
+        $list = array_values(array_filter($list, function ($item) use ($payee) {
+            return strcasecmp($item, $payee) !== 0;
+        }));
+        array_unshift($list, $payee);
+        $list = array_slice($list, 0, 12);
+        setcookie('mmex_last_payees', implode('|', $list), time() + 86400 * 400, '/');
     }
 }

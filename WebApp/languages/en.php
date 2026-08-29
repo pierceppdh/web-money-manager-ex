@@ -34,6 +34,7 @@ $lang["trans.update.submit"] = "Update transaction";
 $lang["trans.duplicate.header"] = "Duplicating transaction";
 $lang["trans.duplicate.submit"] = "Create duplicate";
 $lang["trans.upload.label"] = "Take a picture or upload attachments";
+$lang["trans.more"] = "More (status, notes, photo)";
 
 $lang["trans.date"] = "Date";
 $lang["trans.status"] = "Status";
@@ -76,7 +77,7 @@ $lang["settings.new-trans.section"] = "New transactions";
 $lang["settings.new-trans.disable-payee.placeholder"] = "Disable payees management";
 $lang["settings.new-trans.disable-category.placeholder"] = "Disable categories management";
 
-$lang["settings.new-trans.section"] = "Desktop integration";
+$lang["settings.desktop.section"] = "Desktop integration";
 
 $lang["guide.step1"] = "Copy the data below and paste them into your desktop application.";
 $lang["guide.step2"] = "Re-open desktop application to synchronize bank account(s), etc. to the WebApp from Desktop.";

@@ -149,7 +149,7 @@ include_once '_header.php';
                 echo "<br />";
                 
                 //SECTION DESKTOP INTEGRATION
-                design::section_legened($lang["settings.new-trans.section"]);
+                design::section_legened($lang["settings.desktop.section"]);
                     if (isset($const_desktop_guid))
                         {design::settings("Guid",$const_desktop_guid,"","Text",True);}
                         else

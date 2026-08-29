@@ -26,7 +26,7 @@
 
         <link rel="stylesheet" type="text/css" href="res/bootstrap-3.3.6.min.css<?php echo $s_debug; ?>" />
         <link rel="stylesheet" type="text/css" href="res/bootstrap-theme-3.3.6.min.css<?php echo $s_debug; ?>" />
-        <link rel="stylesheet" type="text/css" href="res/style_global-1.2.1.css<?php echo $s_debug; ?>" />
+        <link rel="stylesheet" type="text/css" href="res/style_global-1.3.0.css<?php echo $s_debug; ?>" />
 
         <!-- optional css -->
 <?php echo $s_head_css_add ?>
@@ -34,7 +34,7 @@
 
         <script src="res/jquery-2.1.4.min.js" type="text/javascript"></script>
         <script src="res/bootstrap-3.3.6.min.js" type="text/javascript"></script>
-        <script src="res/app/functions-1.2.0.js<?php echo $s_debug; ?>" type="text/javascript"></script>
+        <script src="res/app/functions-1.3.0.js<?php echo $s_debug; ?>" type="text/javascript"></script>
 
         <!-- optional js -->
 <?php echo $s_head_js_add ?>
@@ -48,7 +48,7 @@
 ?>
 
     <body>
-        <div class="container text_align_center app_page_title">
+        <div class="container text_align_center app_page_title<?php echo (!empty($b_compact_header)) ? ' compact-header' : ''; ?>">
             <?php
 
             if (!empty($page_header_title))

@@ -23,7 +23,7 @@ $const_disable_authentication = costant::disable_authentication();
 
 if ($const_disable_authentication == 'True')
     {
-        header('Location: landing.php');
+        header('Location: new_transaction.php');
     }
        
 if ($const_disable_authentication !== 'True' && (!isset($const_username) OR !isset($const_password)))
@@ -44,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
                 $user_browser = $_SERVER['HTTP_USER_AGENT'];
                 $_SESSION['username'] = $username;
                 $_SESSION['login_string'] = hash('sha512', $password . $user_browser);
-                header('Location: landing.php');
+                header('Location: new_transaction.php');
                 
             }
             else

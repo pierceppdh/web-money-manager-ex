@@ -15,7 +15,7 @@ $pages_list = various::getPagesList();
 foreach ($pages_list AS $page_url => $page_name):
 ?>
             <div class="div_btn">
-                <a href="<?php echo $page_url ?>.php" class="btn btn-lg btn-success btn-block"><?php
+                <a href="<?php echo $page_url ?>.php" class="btn btn-lg btn-success btn-block<?php echo ($page_url === 'new_transaction') ? ' btn-capture-primary' : ''; ?>"><?php
                 echo $page_name
                 ?></a>
             </div>

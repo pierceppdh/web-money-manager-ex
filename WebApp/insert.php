@@ -1,99 +1,58 @@
 <?php
 
-$b_restricted_auth  = true;
-
-$TrEditedNr = -1;
-if(isset($_POST["TrEditedNr"]))
-{
-    $TrEditedNr = $_POST["TrEditedNr"];
-}
-
+$b_restricted_auth = true;
 include_once '_common.php';
 
-switch ($TrEditedNr)
+if ($_SERVER['REQUEST_METHOD'] !== 'POST')
 {
-    case -1:    
-        $s_page_title = $lang["page.transaction.added"];
-        $transaction_action = 'added';
-    break;
-    case 0:     
-        $s_page_title = $lang["page.transaction.duplicated"];
-        $transaction_action = 'duplicated';
-    break;
-    default:    
-        $s_page_title = $lang["page.transaction.updated"];
-        $transaction_action = 'updated';
-    break;
+    header('Location: new_transaction.php');
+    exit;
 }
 
-$a_head_js_add[]        = '<script src="res/app/base-1.0.4.js" type="text/javascript"></script>';
-$a_head_css_add[]       = '<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">';
+$TrEditedNr = -1;
+if (isset($_POST['TrEditedNr']))
+{
+    $TrEditedNr = $_POST['TrEditedNr'];
+}
 
-include_once '_header.php';
+$TrDate = isset($_POST['Date']) ? $_POST['Date'] : date('Y-m-d');
+$TrStatus = isset($_POST['Status']) ? $_POST['Status'] : '';
+$TrType = isset($_POST['Type']) ? $_POST['Type'] : 'Withdrawal';
+$TrAccount = isset($_POST['Account']) ? $_POST['Account'] : 'None';
+$TrToAccount = isset($_POST['ToAccount']) ? $_POST['ToAccount'] : 'None';
+$TrPayee = isset($_POST['Payee']) ? $_POST['Payee'] : 'None';
+$TrCategory = isset($_POST['Category']) ? $_POST['Category'] : 'None';
+$TrSubCategory = isset($_POST['SubCategory']) ? $_POST['SubCategory'] : 'None';
+$TrAmount = isset($_POST['Amount']) ? $_POST['Amount'] : '0';
+$TrNotes = isset($_POST['Notes']) ? $_POST['Notes'] : '';
 
+if ($TrType !== 'Transfer')
+{
+    $TrToAccount = 'None';
+}
+else
+{
+    $TrPayee = 'None';
+}
 
-    #Get variables
-    $TrDate = $_POST["Date"];
-    $TrStatus = $_POST["Status"];
-    $TrType = $_POST["Type"];
-    $TrAccount = $_POST["Account"];
-    if (isset($_POST["ToAccount"]))
-        {$TrToAccount = $_POST["ToAccount"];}
-        else
-        {$TrToAccount = "None";}
-    if (isset($_POST["Payee"]))
-        {$TrPayee = $_POST["Payee"];}
-        else
-        {$TrPayee = "None";}
-    if (isset($_POST["Category"]))
-        {$TrCategory = $_POST["Category"];}
-        else
-        {$TrCategory = "None";}
-    if (isset($_POST["SubCategory"]))
-        {$TrSubCategory = $_POST["SubCategory"];}
-        else
-        {$TrSubCategory = "None";}
-    $TrAmount = $_POST["Amount"];
-    $TrNotes = $_POST["Notes"];
+db_function::category_insert_single($TrCategory, $TrSubCategory);
+db_function::payee_insert_single($TrPayee, $TrCategory, $TrSubCategory);
+db_function::payee_update_single($TrPayee, $TrCategory, $TrSubCategory);
 
-    #Execute common insert
-    db_function::category_insert_single($TrCategory,$TrSubCategory);
-    db_function::payee_insert_single($TrPayee,$TrCategory,$TrSubCategory);
-    db_function::payee_update_single($TrPayee,$TrCategory,$TrSubCategory);
-
-    if ($TrEditedNr > 0)
-    {
-
-        # Update
-        db_function::transaction_update($TrEditedNr, $TrDate, $TrStatus, $TrType, $TrAccount, $TrToAccount, $TrPayee, $TrCategory, $TrSubCategory, $TrAmount, $TrNotes);
-
-        echo "<script type='text/javascript'>";
-            echo "location.href='show.php'";
-        echo "</script>";
-    }
-    else
-    {
-        $TrEditedNr = db_function::transaction_insert ($TrDate, $TrStatus, $TrType, $TrAccount, $TrToAccount, $TrPayee, $TrCategory, $TrSubCategory, $TrAmount, $TrNotes);
-    }
-
+if ($TrEditedNr > 0)
+{
+    db_function::transaction_update($TrEditedNr, $TrDate, $TrStatus, $TrType, $TrAccount, $TrToAccount, $TrPayee, $TrCategory, $TrSubCategory, $TrAmount, $TrNotes);
     attachments::rename_zero($TrEditedNr);
+    various::last_account_set($TrAccount);
+    header('Location: show.php');
+    exit;
+}
 
-?>
-        
-        <div class="container text_align_center">
-            <i class="material-icons md-48 btn-success">
-                check_box
-            </i>
-            <h3>
-                <?php echo $lang["trans.msg.action-".$transaction_action.".successfully"] ?> 
-            </h3>
-            <br />
-            <br />
-            <a href="new_transaction.php" class="btn btn-lg btn-success btn-block"><?php echo $lang["trans.msg.add-next"] ?></a>
-            <br />
-            <a href="show.php" class="btn btn-lg btn-success btn-block"><?php echo $lang["page.show-transactions"] ?></a>
-            <br />
-        </div>
-		
-    </body>
-</html>
+$newId = db_function::transaction_insert($TrDate, $TrStatus, $TrType, $TrAccount, $TrToAccount, $TrPayee, $TrCategory, $TrSubCategory, $TrAmount, $TrNotes);
+attachments::rename_zero($newId);
+various::last_account_set($TrAccount);
+various::last_payees_remember($TrPayee);
+
+$saved = ($TrEditedNr == 0) ? 'duplicated' : 'added';
+header('Location: new_transaction.php?saved=' . $saved);
+exit;

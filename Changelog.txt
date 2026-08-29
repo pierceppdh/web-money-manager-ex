@@ -1,3 +1,11 @@
+Version 1.3.0
+- Faster phone capture: amount, payee, category first; extra fields under More
+- After save, return immediately to a blank new-transaction form
+- Remember last account and recent payees
+- Login opens new transaction
+- Fix transfer radios, today's date, attachment table, subcategory lookup
+- PHP 8.3 deprecated string interpolation
+
 Version 1.2.3
 - Security fixes
 

@@ -34,6 +34,7 @@ $lang["trans.update.submit"] = "Aggiorna";
 $lang["trans.duplicate.header"] = "Duplica operazione";
 $lang["trans.duplicate.submit"] = "Duplica";
 $lang["trans.upload.label"] = "Fai una foto o carica allegati";
+$lang["trans.more"] = "Altro (stato, note, foto)";
 
 $lang["trans.date"] = "Data";
 $lang["trans.status"] = "Stato";
@@ -75,7 +76,7 @@ $lang["settings.authentication.password.confirm.placeholder"] = "Conferma la nuo
 $lang["settings.new-trans.section"] = "Nuove transazioni";
 $lang["settings.new-trans.disable-payee.placeholder"] = "Disattiva la gestione del beneficiario";
 $lang["settings.new-trans.disable-category.placeholder"] = "Disattiva la gestione della categoria";
-$lang["settings.new-trans.section"] = "Integrazione desktop";
+$lang["settings.desktop.section"] = "Integrazione desktop";
 
 $lang["guide.step1"] = "Copia le informazioni qui sotto e incollale nell'applicazione desktop.";
 $lang["guide.step2"] = "Riapri l'applicazione desktop per sincronizzare i conti, i beneficiari, etc. sulla WebApp.";
