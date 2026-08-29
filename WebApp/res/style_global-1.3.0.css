@@ -297,11 +297,76 @@ hr
     color: #3c763d;
 }
 
-.form-group-type .type-radios {
-    display: flex;
-    flex-wrap: wrap;
+.form-transaction .form-group-type {
+    height: auto !important;
+    overflow: visible;
+    clear: both;
+}
+
+.form-transaction .form-group-type .type-heading {
+    display: block !important;
+    float: none !important;
+    width: auto !important;
+    max-width: none !important;
+    margin: 0 0 6px 0 !important;
+    font-weight: 700;
+}
+
+.form-transaction .form-group-type .type-radios {
+    display: flex !important;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    width: 100% !important;
+    max-width: 100% !important;
+    float: none !important;
+    gap: 6px;
+    box-sizing: border-box;
+}
+
+.form-transaction .form-group-type .type-option {
+    flex: 1 1 0;
+    display: flex !important;
     align-items: center;
-    gap: 4px 8px;
+    justify-content: center;
+    min-height: 44px;
+    margin: 0 !important;
+    padding: 8px 4px !important;
+    border: 1px solid #bbb;
+    border-radius: 6px;
+    background: #fff;
+    float: none !important;
+    width: auto !important;
+    max-width: none !important;
+    clear: none !important;
+    font-weight: 600;
+    text-align: center;
+    line-height: 1.2;
+    box-sizing: border-box;
+}
+
+.form-transaction .form-group-type .type-option-text {
+    display: inline !important;
+    float: none !important;
+    width: auto !important;
+    max-width: none !important;
+}
+
+.form-transaction .form-group-type input[type="radio"] {
+    position: absolute !important;
+    opacity: 0 !important;
+    width: 1px !important;
+    height: 1px !important;
+    margin: 0 !important;
+    float: none !important;
+    clear: none !important;
+    pointer-events: none;
+}
+
+.form-transaction .form-group-type .type-option:has(input:checked) {
+    background: #419641;
+    color: #fff;
+    border-color: #398439;
 }
 
 .btn-capture-primary {
@@ -312,6 +377,33 @@ hr
 @media only screen and (max-width: 640px) {
     .form-transaction .form-group-type,
     .form-transaction .capture-more .form-group {
-        height: auto;
+        height: auto !important;
+    }
+    .form-transaction .form-group.form-group-type .type-radios,
+    .form-transaction .form-group.form-group-type .type-option,
+    .form-transaction .form-group.form-group-type .type-option-text,
+    .form-transaction .form-group.form-group-type .type-heading {
+        float: none !important;
+        width: auto !important;
+        max-width: none !important;
+        margin-left: 0 !important;
+        clear: none !important;
+    }
+    .form-transaction .form-group.form-group-type .type-radios {
+        display: flex !important;
+        width: 100% !important;
+    }
+    .form-transaction .form-group.form-group-type .type-option {
+        flex: 1 1 0;
+        display: flex !important;
+        min-height: 44px;
+    }
+    .form-transaction .form-group.form-group-type input[type="radio"] {
+        position: absolute !important;
+        width: 1px !important;
+        height: 1px !important;
+        margin: 0 !important;
+        float: none !important;
+        clear: none !important;
     }
 }

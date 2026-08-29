@@ -57,14 +57,16 @@ class design
         $TypeArrayCode = array ('Withdrawal', 'Deposit', 'Transfer');
 
         echo '<div class="form-group form-group-type">';
-            echo '<label>'.costant::lang("trans.type").'</label>';
-            echo '<div class="type-radios">';
+            echo '<span class="type-heading">'.costant::lang("trans.type").'</span>';
+            echo '<div class="type-radios" role="radiogroup" aria-label="'.costant::lang("trans.type").'">';
             for ($i = 0; $i < sizeof($TypeArrayCode); $i++)
             {
                 $is_selected = ($TypeArrayCode[$i] == $TrTypeDefault) ? ' checked' : '';
                 $element_id = 'Type_' . $TypeArrayCode[$i];
+                echo '<label class="type-option" for="' . $element_id . '">';
                 echo '<input type="radio" id="' . $element_id . '" name="Type" value="' . $TypeArrayCode[$i] . '"' . $is_selected . '>';
-                echo '<label for="' . $element_id . '">' . $TypeArrayDesc[$i] . '</label>';
+                echo '<span class="type-option-text">' . $TypeArrayDesc[$i] . '</span>';
+                echo '</label>';
             }
             echo '</div>';
             echo '<span class="help-block"></span>';
