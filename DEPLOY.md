@@ -2,17 +2,17 @@
 
 Local change → `git push` → Dockhand pulls this repo, **rebuilds** `webmmxapp:latest`, and recreates the container. SQLite, settings, and attachments stay on the NAS.
 
-The new stack is **`webmmxapp` on port 9081**. Leave the current `webmmx` stack on 9080 running until you switch.
+The stack is **`webmmxapp`**. Host port comes from the Dockhand variable **`WEBMMX_PORT`** (default **9080**). The name is `WEBMMX_PORT`, not `WEBMM_PORT`.
 
 ```
-laptop  --push-->  GitHub  --webhook or poll-->  Dockhand on OMV  --build-->  webmmxapp:9081
+laptop  --push-->  GitHub  --webhook or poll-->  Dockhand on OMV  --build-->  webmmxapp:${WEBMMX_PORT}
 ```
 
-| | Current (keep) | New |
-|---|---|---|
-| Stack / container | `webmmx` | `webmmxapp` |
-| URL | `http://omv.home:9080/` | `http://omv.home:9081/` |
-| Files | `/data/webmmx` (full web root) | `/data/webmmxapp` (data only) |
+| | New stack |
+|---|---|
+| Stack / container | `webmmxapp` |
+| URL | `http://omv.home:${WEBMMX_PORT}/` (default 9080) |
+| Files | `/data/webmmxapp` (data only) |
 
 ## 1. Copy data (do not move the live app)
 
@@ -50,12 +50,20 @@ The fork is **public**: `https://github.com/pierceppdh/web-money-manager-ex.git`
 3. Stack name: `webmmxapp`
 4. Branch: `master`
 5. Compose path: **`compose.yaml`**
-6. Port **9081**, data **`/data/webmmxapp`**, and DNS are hardcoded in `compose.yaml` (no stack variables required)
+6. Stack variables (exact names, no leading/trailing spaces):
+
+   | Key | Value |
+   |---|---|
+   | `WEBMMX_PORT` | `9080` |
+   | `WEBMMX_DATA` | `/data/webmmxapp` |
+   | `WEBMMX_DNS` | `192.168.0.25` |
+
+   `WEBMM_PORT` is not read. If the app stays on 9081, `WEBMMX_PORT` is still set to 9081 — change it to 9080 and redeploy.
 7. Enable **Build on deploy** (required: the image is built from this repo)
 8. Enable **Force redeploy** / **Re-pull** if your Dockhand version has it, so a PHP-only commit still rebuilds
-9. Deploy and confirm `http://omv.home:9081/`
+9. Deploy and confirm `http://omv.home:9080/`
 
-Desktop MMEX still points at the old URL until you change **Options → Network → WebApp** to `http://omv.home:9081/` (same GUID if you copied `configuration_user.php`). Do not point desktop at both; pick one when you switch.
+Point desktop MMEX **Options → Network → WebApp** at `http://omv.home:9080/` (same GUID if you copied `configuration_user.php`).
 
 ## 5. Updates: webhook vs poll
 
@@ -108,22 +116,16 @@ docker compose up --build
 git add -A && git commit -m "..." && git push origin master
 ```
 
-Wait for Dockhand (webhook or next poll). The phone app at port **9081** should serve the new code; pending transactions remain in `/data/webmmxapp/MMEX_New_Transaction.db`.
-
-## 7. When you fully switch
-
-1. Point desktop MMEX WebApp URL to `http://omv.home:9081/`
-2. Use only 9081 from the phone
-3. Stop / Down the old `webmmx` stack
-4. Keep `/data/webmmx` as a backup for a while, then delete it if you no longer need it
+Wait for Dockhand (webhook or next poll). The phone app is at `http://omv.home:${WEBMMX_PORT}/` (default 9080). Pending transactions remain in `/data/webmmxapp/MMEX_New_Transaction.db`.
 
 ## 8. If something goes wrong
 
 | Symptom | Likely cause |
 |---|---|
-| Site still looks old | **Build on deploy** off, or you are still opening port **9080** |
+| Site still looks old | **Build on deploy** off, or browser cache |
 | Empty settings / no transactions | Data dir empty; copy files as in step 1 |
-| Port already allocated | Something else on 9081; the old app should stay on 9080 |
+| Still on 9081 | `compose.yaml` now reads `WEBMMX_PORT` (with **X**). `WEBMM_PORT` is ignored. Set `WEBMMX_PORT=9080` with no spaces and redeploy |
+| Port already allocated | Another container still bound to 9080 |
 | `WEBMMX_DATA` is a file or empty dir | Host path did not exist; Docker created a directory. Create the folder and copy the DB/config in |
 | Webhook never fires | GitHub cannot reach `omv.home`; use poll |
 | Deploy skipped | Push was not to `master`, or Dockhand did not rebuild because compose.yaml was unchanged — enable build-on-deploy / force redeploy |

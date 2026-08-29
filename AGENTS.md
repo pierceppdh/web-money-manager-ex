@@ -10,6 +10,6 @@ After **every** code change that should go live:
 
 Do not skip step 3. The webhook secret lives in `.env.local` (gitignored), never in committed files.
 
-Stack: `webmmxapp` at `http://omv.home:9081/`  
+Stack: `webmmxapp` at `http://omv.home:${WEBMMX_PORT}/` (default 9080)  
 Data: `/data/webmmxapp`  
-Old app stays on port 9080 until the switch.
+Dockhand variable name is `WEBMMX_PORT` (not `WEBMM_PORT`).

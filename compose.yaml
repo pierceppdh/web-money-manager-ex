@@ -1,7 +1,10 @@
 # Dockhand Git stack (compose path: compose.yaml)
 #
-# Runs beside the existing webmmx stack (port 9080) until you switch over.
 # App code is baked into the image from Git. Persistent data stays on the NAS.
+#
+# Stack variable (exact name, no spaces):
+#   WEBMMX_PORT=9080
+# WEBMM_PORT is ignored. Default is 9080 if WEBMMX_PORT is unset.
 
 services:
   webmmxapp:
@@ -10,13 +13,15 @@ services:
     image: webmmxapp:latest
     restart: unless-stopped
     ports:
-      - "9081:80"
+      - target: 80
+        published: ${WEBMMX_PORT:-9080}
+        protocol: tcp
     environment:
       MMEX_DATA_DIR: /data
       MMEX_DB_PATH: /data/MMEX_New_Transaction.db
       MMEX_CONFIG_PATH: /data/configuration_user.php
       MMEX_ATTACHMENTS_DIR: /data/attachments
     volumes:
-      - /data/webmmxapp:/data
+      - ${WEBMMX_DATA:-/data/webmmxapp}:/data
     dns:
-      - "192.168.0.25"
+      - "${WEBMMX_DNS:-192.168.0.25}"
