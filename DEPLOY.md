@@ -1,40 +1,38 @@
 # Deploy from Git with Dockhand
 
-Local change → `git push` → Dockhand pulls this repo, **rebuilds** `webmmx:latest`, and recreates the container. SQLite, settings, and attachments stay on the NAS.
+Local change → `git push` → Dockhand pulls this repo, **rebuilds** `webmmxapp:latest`, and recreates the container. SQLite, settings, and attachments stay on the NAS.
+
+The new stack is **`webmmxapp` on port 9081**. Leave the current `webmmx` stack on 9080 running until you switch.
 
 ```
-laptop  --push-->  GitHub  --webhook or poll-->  Dockhand on OMV  --build-->  webmmx:9080
+laptop  --push-->  GitHub  --webhook or poll-->  Dockhand on OMV  --build-->  webmmxapp:9081
 ```
 
-## 1. One-time data move (keep your existing transactions)
+| | Current (keep) | New |
+|---|---|---|
+| Stack / container | `webmmx` | `webmmxapp` |
+| URL | `http://omv.home:9080/` | `http://omv.home:9081/` |
+| Files | `/data/webmmx` (full web root) | `/data/webmmxapp` (data only) |
 
-The old stack mounted the **whole** web root:
-
-```yaml
-volumes:
-  - /data/webmmx:/var/www/html
-```
-
-That hid image updates. Persistent files now live in a **data-only** folder.
+## 1. Copy data (do not move the live app)
 
 On the OMV host:
 
 ```bash
-sudo mkdir -p /data/webmmx-data/attachments
+sudo mkdir -p /data/webmmxapp/attachments
 
-# Copy live data from the current bind mount (adjust if your files differ)
-sudo cp -a /data/webmmx/configuration_user.php /data/webmmx-data/
-sudo cp -a /data/webmmx/MMEX_New_Transaction.db /data/webmmx-data/
-sudo cp -a /data/webmmx/attachments/. /data/webmmx-data/attachments/
+sudo cp -a /data/webmmx/configuration_user.php /data/webmmxapp/
+sudo cp -a /data/webmmx/MMEX_New_Transaction.db /data/webmmxapp/
+sudo cp -a /data/webmmx/attachments/. /data/webmmxapp/attachments/
 
-sudo chown -R 33:33 /data/webmmx-data   # www-data inside the official PHP image
+sudo chown -R 33:33 /data/webmmxapp   # www-data inside the official PHP image
 ```
 
-Leave `/data/webmmx` as a backup until you have confirmed a login and a pending transaction still appear.
+The old `/data/webmmx` tree stays in place so 9080 keeps working.
 
-## 2. Stop the old stack
+## 2. Keep the old stack
 
-In Dockhand, **Stop** then **Down** the current `webmmx` stack (or remove it). Port `9080` and the name `webmmx` must be free. Do not delete `/data/webmmx-data`.
+Do **not** stop `webmmx`. The new compose uses a different container name, image name, port, and data path, so both can run.
 
 ## 3. Add the Git repository
 
@@ -49,20 +47,22 @@ The fork is **public**: `https://github.com/pierceppdh/web-money-manager-ex.git`
 
 1. **Stacks** → **From Git**
 2. Repository: the one above
-3. Stack name: `webmmx`
+3. Stack name: `webmmxapp`
 4. Branch: `master`
 5. Compose path: **`compose.yaml`**
-6. Stack variables (same as your old compose):
+6. Stack variables:
 
    | Key | Value |
    |---|---|
-   | `WEBMMX_PORT` | `9080` |
-   | `WEBMMX_DATA` | `/data/webmmx-data` |
+   | `WEBMMX_PORT` | `9081` |
+   | `WEBMMX_DATA` | `/data/webmmxapp` |
    | `WEBMMX_DNS` | `192.168.0.25` |
 
-7. Enable **Build on deploy** (required: the image is built from this repo, not pulled from Docker Hub)
+7. Enable **Build on deploy** (required: the image is built from this repo)
 8. Enable **Force redeploy** / **Re-pull** if your Dockhand version has it, so a PHP-only commit still rebuilds
-9. Deploy and confirm `http://omv.home:9080/`
+9. Deploy and confirm `http://omv.home:9081/`
+
+Desktop MMEX still points at the old URL until you change **Options → Network → WebApp** to `http://omv.home:9081/` (same GUID if you copied `configuration_user.php`). Do not point desktop at both; pick one when you switch.
 
 ## 5. Updates: webhook vs poll
 
@@ -107,17 +107,25 @@ docker compose up --build
 git add -A && git commit -m "..." && git push origin master
 ```
 
-Wait for Dockhand (webhook or next poll). The phone app at port 9080 should serve the new code; pending transactions remain in `/data/webmmx-data/MMEX_New_Transaction.db`.
+Wait for Dockhand (webhook or next poll). The phone app at port **9081** should serve the new code; pending transactions remain in `/data/webmmxapp/MMEX_New_Transaction.db`.
 
-## 7. If something goes wrong
+## 7. When you fully switch
+
+1. Point desktop MMEX WebApp URL to `http://omv.home:9081/`
+2. Use only 9081 from the phone
+3. Stop / Down the old `webmmx` stack
+4. Keep `/data/webmmx` as a backup for a while, then delete it if you no longer need it
+
+## 8. If something goes wrong
 
 | Symptom | Likely cause |
 |---|---|
-| Site still looks old | **Build on deploy** off, or old stack still bound to `/data/webmmx:/var/www/html` |
+| Site still looks old | **Build on deploy** off, or you are still opening port **9080** |
 | Empty settings / no transactions | Data dir empty; copy files as in step 1 |
+| Port already allocated | Something else on 9081; the old app should stay on 9080 |
 | `WEBMMX_DATA` is a file or empty dir | Host path did not exist; Docker created a directory. Create the folder and copy the DB/config in |
 | Webhook never fires | GitHub cannot reach `omv.home`; use poll |
 | Deploy skipped | Push was not to `master`, or Dockhand did not rebuild because compose.yaml was unchanged — enable build-on-deploy / force redeploy |
-| Permission denied on save | `chown 33:33 /data/webmmx-data` |
+| Permission denied on save | `chown 33:33 /data/webmmxapp` |
 
 Desktop MMEX sync is unchanged (`services.php` + GUID in settings).

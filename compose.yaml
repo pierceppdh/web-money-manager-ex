@@ -1,23 +1,23 @@
 # Dockhand Git stack (default compose path: compose.yaml)
 #
+# Runs beside the existing webmmx stack (port 9080) until you switch over.
 # App code is baked into the image from Git. Persistent data stays on the NAS.
-# Set WEBMMX_DATA / WEBMMX_PORT / WEBMMX_DNS as Dockhand stack variables
-# (do not commit secrets; configuration_user.php lives on the volume).
+# Set WEBMMX_DATA / WEBMMX_PORT / WEBMMX_DNS as Dockhand stack variables.
 
 services:
-  webmmx:
-    container_name: webmmx
+  webmmxapp:
+    container_name: webmmxapp
     build: .
-    image: webmmx:latest
+    image: webmmxapp:latest
     restart: unless-stopped
     ports:
-      - "${WEBMMX_PORT:-9080}:80"
+      - "${WEBMMX_PORT:-9081}:80"
     environment:
       MMEX_DATA_DIR: /data
       MMEX_DB_PATH: /data/MMEX_New_Transaction.db
       MMEX_CONFIG_PATH: /data/configuration_user.php
       MMEX_ATTACHMENTS_DIR: /data/attachments
     volumes:
-      - ${WEBMMX_DATA:-/data/webmmx-data}:/data
+      - ${WEBMMX_DATA:-/data/webmmxapp}:/data
     dns:
       - ${WEBMMX_DNS:-192.168.0.25}

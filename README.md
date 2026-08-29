@@ -39,11 +39,11 @@ If you know what you are doing, you can install a webserver on your PC. After th
 docker compose up --build -d
 ```
 
-The app is at `http://localhost:9080/` by default. SQLite, `configuration_user.php`, and attachments are stored in the `WEBMMX_DATA` directory (see `.env.example`), not in the image.
+The app is at `http://localhost:9081/` by default (`webmmxapp`). SQLite, `configuration_user.php`, and attachments are stored in the `WEBMMX_DATA` directory (see `.env.example`), not in the image.
 
 ### Dockhand (Git deploy)
 
-Push to this repository, then let Dockhand rebuild the stack from `compose.yaml`. Persistent data stays on the host. Full steps, including migrating an existing `/data/webmmx` volume: see [DEPLOY.md](DEPLOY.md).
+Push to this repository, then let Dockhand rebuild the `webmmxapp` stack from `compose.yaml` on port **9081**. Persistent data stays on `/data/webmmxapp`. The old `webmmx` stack on 9080 can keep running until you switch. Full steps: [DEPLOY.md](DEPLOY.md).
 
 The GUID for data sync with the desktop version is auto-generated. We suggest not changing it.
 
