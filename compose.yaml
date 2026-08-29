@@ -22,6 +22,6 @@ services:
       MMEX_CONFIG_PATH: /data/configuration_user.php
       MMEX_ATTACHMENTS_DIR: /data/attachments
     volumes:
-      - ${WEBMMX_DATA:-/data/webmmxapp}:/data
+      - /data/webmmxapp:/data
     dns:
-      - "${WEBMMX_DNS:-192.168.0.25}"
+      - "192.168.0.25"
