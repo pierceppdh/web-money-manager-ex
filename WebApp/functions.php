@@ -1,9 +1,9 @@
 <?php
 require_once 'configuration_system.php';
 
-if (file_exists('configuration_user.php'))
+if (file_exists($configuration_user_path))
 {
-    require_once 'configuration_user.php';
+    require_once $configuration_user_path;
 }
 
 require_once 'languages/en.php';

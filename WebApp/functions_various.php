@@ -16,10 +16,10 @@ class various
 
     public static function update_configuration_file ($ParameterArray)
         {
-            $configfile="configuration_user.php";
-
-            if (file_exists($configfile))
-                {unlink($configfile);}
+            $configfile = costant::user_config_path();
+            $configdir = dirname($configfile);
+            if ($configdir !== '' && $configdir !== '.' && !is_dir($configdir))
+                {mkdir($configdir, 0775, true);}
 
             $fileopen = fopen($configfile, 'w');
             fwrite($fileopen, '<?php'."\n");

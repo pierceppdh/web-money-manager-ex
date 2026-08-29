@@ -44,6 +44,13 @@ class costant
                 global $dbpath;
                 return $dbpath;
             }
+        public static function user_config_path ()
+            {
+                global $configuration_user_path;
+                if (!isset($configuration_user_path) || $configuration_user_path === '')
+                    {return 'configuration_user.php';}
+                return $configuration_user_path;
+            }
 
         public static function desktop_guid ()
             {

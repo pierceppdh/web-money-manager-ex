@@ -16,7 +16,7 @@ if (isset($_FILES['UploadedAttachments']) && isset($_POST["Attachment_TrId"]))
         $FileName = $_FILES['UploadedAttachments']['name'];
         $FileExtension = substr($FileName,strpos($FileName,".")+1,strlen($FileName));
         $NewFileName = "Transaction_".$TrNumber."_Attach".(attachments::get_number_of_attachments($TrNumber)+1).".".$FileExtension;
-        move_uploaded_file ($_FILES['UploadedAttachments']['tmp_name'], "attachments/".$NewFileName);
+        move_uploaded_file ($_FILES['UploadedAttachments']['tmp_name'], costant::attachments_folder()."/".$NewFileName);
         echo $NewFileName;
     }
     

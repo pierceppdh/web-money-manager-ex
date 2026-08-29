@@ -57,7 +57,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST")
                 "desktop_guid"          => $guid
             );
               
-        if (file_exists("configuration_user.php"))
+        if (file_exists(costant::user_config_path()))
             {
                 various::update_configuration_file($parameterarray);
                 header("Location: landing.php");

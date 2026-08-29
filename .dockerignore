@@ -1,0 +1,13 @@
+.git
+.github
+.gitignore
+.env
+.env.*
+!.env.example
+*.md
+LICENSE
+Changelog.txt
+MMEX_New_Transaction.db
+configuration_user.php
+WebApp/attachments/Transaction*.*
+WebApp/configuration_user.php*

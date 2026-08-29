@@ -33,15 +33,17 @@ If you know what you are doing, you can install a webserver on your PC. After th
  4. Open your browser to the folder URL.
  5. Fill in a username and password and review the settings.
 
-### Docker Way 
+### Docker Way
 
-Run the following commands after cloning this repo:
+```bash
+docker compose up --build -d
+```
 
-1. `docker build -t webmmx:latest .`
+The app is at `http://localhost:9080/` by default. SQLite, `configuration_user.php`, and attachments are stored in the `WEBMMX_DATA` directory (see `.env.example`), not in the image.
 
-2. `docker run -d -p <your available port>:80 webmmx:latest`
+### Dockhand (Git deploy)
 
-
+Push to this repository, then let Dockhand rebuild the stack from `compose.yaml`. Persistent data stays on the host. Full steps, including migrating an existing `/data/webmmx` volume: see [DEPLOY.md](DEPLOY.md).
 
 The GUID for data sync with the desktop version is auto-generated. We suggest not changing it.
 
