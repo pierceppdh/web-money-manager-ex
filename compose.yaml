@@ -2,9 +2,9 @@
 #
 # App code is baked into the image from Git. Persistent data stays on the NAS.
 #
-# Stack variable (exact name, no spaces):
-#   WEBMMX_PORT=9080
-# WEBMM_PORT is ignored. Default is 9080 if WEBMMX_PORT is unset.
+# Host port is 9080. Do not use ${WEBMMX_PORT} here: Dockhand injects a
+# leading space (e.g. " 9080") and Docker then fails with
+# invalid port specification: " 9080".
 
 services:
   webmmxapp:
@@ -13,9 +13,7 @@ services:
     image: webmmxapp:latest
     restart: unless-stopped
     ports:
-      - target: 80
-        published: ${WEBMMX_PORT:-9080}
-        protocol: tcp
+      - "9080:80"
     environment:
       MMEX_DATA_DIR: /data
       MMEX_DB_PATH: /data/MMEX_New_Transaction.db

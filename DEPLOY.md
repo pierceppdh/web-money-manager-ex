@@ -124,7 +124,7 @@ Wait for Dockhand (webhook or next poll). The phone app is at `http://omv.home:$
 |---|---|
 | Site still looks old | **Build on deploy** off, or browser cache |
 | Empty settings / no transactions | Data dir empty; copy files as in step 1 |
-| Still on 9081 | `compose.yaml` now reads `WEBMMX_PORT` (with **X**). `WEBMM_PORT` is ignored. Set `WEBMMX_PORT=9080` with no spaces and redeploy |
+| Still on 9081 / invalid port `" 9080"` | Dockhand puts a **leading space** in `WEBMMX_PORT`, which Docker rejects. Host port is therefore hardcoded as `9080:80` in `compose.yaml`. `WEBMM_PORT` (no X) is never read. |
 | Port already allocated | Another container still bound to 9080 |
 | `WEBMMX_DATA` is a file or empty dir | Host path did not exist; Docker created a directory. Create the folder and copy the DB/config in |
 | Webhook never fires | GitHub cannot reach `omv.home`; use poll |
